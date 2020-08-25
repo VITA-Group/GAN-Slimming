@@ -59,10 +59,13 @@ python finetune.py --dataset <dataset_name> --task <task_name> --base_model_str 
 
 Finetune results will be saved in `finetune_results/<dataset_name>/<task_name>`
 
+## Pretrianed Models
+Pretrained models are available through [Google Drive](https://drive.google.com/drive/folders/1aBAyuaGX1jxF3lqx1HEzEieX_cXjIapq?usp=sharing)
+
 ## Citation
 If you use this code for your research, please cite our paper.
 ```
-@inproceedings{wang2020GAN,
+@inproceedings{wang2020ganslimming,
   title={GAN Slimming: All-in-One GAN Compression by A Unified Optimization Framework},
   author={Wang, Haotao and Gui, Shupeng and Yang, Haichuan and Liu, Ji and Wang, Zhangyang},
   booktitle={European Conference on Computer Vision},
