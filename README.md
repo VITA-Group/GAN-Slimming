@@ -1,8 +1,9 @@
 # GAN-Slimming
 
-## Overview
 GAN Slimming: All-in-One GAN Compression by A Unified Optimization Framework
+
 Haotao Wang, Shupeng Gui, Haichuan Yang, Ji Liu, Zhangyang Wang
+
 In ECCV 2020 (Spotlight)
 
 ## Training
