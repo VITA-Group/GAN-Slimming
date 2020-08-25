@@ -32,17 +32,25 @@ python gs.py --rho 0.01 --quant --dataset <dataset_name> --task <task_name>
 ```
 
 The training results (checkpoints, loss curves, etc.) will be saved in `results/<dataset_name>/<task_name>`.
+Valid `<dataset_name>`s are: `horse2zebra`, `summer2winter_yosemite`.
+Valid `<task_name>`s are: `A2B`, `B2A`. (For example, `horse2zebra/A2B` means transferring horse to zebra and `horse2zebra/B2A` means transferring zebra to horse.)
 
 
-### 4. Extract subnetwork obtained by GS
+### 4. Extract compact subnetwork obtained by GS
+GAN slimming has pruned some channels in the network by setting the channel-wise mask to zero. Now we need to extract the actual compressed subnetowrk.
+
 ```
 python extract_subnet.py --dataset <dataset_name> --task <task_name> --model_str <model_str> 
 ```
 
-Finetune subnetwork:
+The extracted subnetworks will be saved in `subnet_structures/<dataset_name>/<task_name>`
+
+### 5. Finetune subnetwork
 ```
 python finetune.py --dataset <dataset_name> --task <task_name> --base_model_str <base_model_str>
 ```
+
+Finetune results will be saved in `finetune_results/<dataset_name>/<task_name>`
 
 ## Citation
 If you use this code for your research, please cite our paper.

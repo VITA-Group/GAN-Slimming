@@ -3,7 +3,6 @@ import torch.nn.functional as F
 import torch
 from torch.nn.modules.utils import _pair
 import numpy as np
-from collections import namedtuple
 
 ## quantizatin conv layers
 
@@ -230,8 +229,8 @@ class Discriminator(nn.Module):
         return F.avg_pool2d(x, x.size()[2:]).view(x.size()[0], -1)
 
 
-if __name__ == "__main__":
-    from utils import measure_model, model_size
-    g = Generator(3, 3, transconv=False)
-    measure_model(g, 256, 256)
-    print(model_size(g))
+# if __name__ == "__main__":
+#     from utils.utils import measure_model, model_size
+#     g = Generator(3, 3)
+#     measure_model(g, 256, 256)
+#     print(model_size(g))
