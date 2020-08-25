@@ -8,6 +8,12 @@ Haotao Wang, Shupeng Gui, Haichuan Yang, Ji Liu, Zhangyang Wang
 
 In ECCV 2020 (Spotlight)
 
+## Overview
+An all-in-one GAN compression method integrating model distillation, channel pruning and quantization under GAN minimax optimization framework.
+
+## Visualization Results
+![Image-to-image translation by (compressed) CycleGAN:](results.PNG)
+
 ## Training
 ### 1. Download dataset:
 ```
