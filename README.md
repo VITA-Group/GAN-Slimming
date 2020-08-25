@@ -1,8 +1,11 @@
 # GAN-Slimming
 
-## Overview:
+## Overview
+GAN Slimming: All-in-One GAN Compression by A Unified Optimization Framework
+Haotao Wang, Shupeng Gui, Haichuan Yang, Ji Liu, Zhangyang Wang
+In ECCV 2020 (Spotlight)
 
-## Training:
+## Training
 ### 1. Download dataset:
 ```
 ./download_dataset <dataset_name>
@@ -28,7 +31,7 @@ python gs.py --rho 0.01 --quant --dataset <dataset_name> --task <task_name>
 The training results (checkpoints, loss curves, etc.) will be saved in `results/<dataset_name>/<task_name>`.
 
 
-### 4. Extract subnetwork obtained by GS:
+### 4. Extract subnetwork obtained by GS
 ```
 python extract_subnet.py --dataset <dataset_name> --task <task_name> --model_str <model_str> 
 ```
