@@ -1,5 +1,4 @@
 # GAN-Slimming
-Comming soon
 
 ## Overview:
 
