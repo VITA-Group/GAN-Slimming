@@ -1,6 +1,8 @@
 # GAN-Slimming
 
-GAN Slimming: All-in-One GAN Compression by A Unified Optimization Framework
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+
+[GAN Slimming: All-in-One GAN Compression by A Unified Optimization Framework](https://www.ecva.net/papers/eccv_2020/papers_ECCV/papers/123490052.pdf)
 
 Haotao Wang, Shupeng Gui, Haichuan Yang, Ji Liu, Zhangyang Wang
 
