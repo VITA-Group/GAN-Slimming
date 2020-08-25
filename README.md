@@ -12,7 +12,8 @@ In ECCV 2020 (Spotlight)
 An all-in-one GAN compression method integrating model distillation, channel pruning and quantization under GAN minimax optimization framework.
 
 ## Visualization Results
-![Image-to-image translation by (compressed) CycleGAN:](results.PNG)
+Image-to-image translation by (compressed) CycleGAN:
+![](results.PNG)
 
 ## Training
 ### 1. Download dataset:
@@ -64,7 +65,7 @@ If you use this code for your research, please cite our paper.
 @inproceedings{wang2020GAN,
   title={GAN Slimming: All-in-One GAN Compression by A Unified Optimization Framework},
   author={Wang, Haotao and Gui, Shupeng and Yang, Haichuan and Liu, Ji and Wang, Zhangyang},
-  booktitle={ECCV},
+  booktitle={European Conference on Computer Vision},
   year={2020}
 }
 ```
