@@ -72,3 +72,9 @@ If you use this code for your research, please cite our paper.
   year={2020}
 }
 ```
+
+## Our Related Work
+Please also check our concurrent work on combining neural architecture search (NAS) and model distillation for GAN compression:
+
+Yonggan Fu, Wuyang Chen, Haotao Wang, Haoran Li, Yingyan Lin, and Zhangyang Wang. "AutoGAN-Distiller: Searching to Compress Generative Adversarial Networks." ICML, 2020.
+[pdf](https://arxiv.org/pdf/2006.08198.pdf) [code](https://github.com/VITA-Group/AGD)
