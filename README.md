@@ -60,7 +60,7 @@ python finetune.py --dataset <dataset_name> --task <task_name> --base_model_str 
 Finetune results will be saved in `finetune_results/<dataset_name>/<task_name>`
 
 ## Pretrianed Models
-Pretrained models are available through [Google Drive](https://drive.google.com/drive/folders/1aBAyuaGX1jxF3lqx1HEzEieX_cXjIapq?usp=sharing)
+Pretrained models are available through [Google Drive](https://drive.google.com/drive/folders/1aBAyuaGX1jxF3lqx1HEzEieX_cXjIapq?usp=sharing).
 
 ## Citation
 If you use this code for your research, please cite our paper.
@@ -77,4 +77,4 @@ If you use this code for your research, please cite our paper.
 Please also check our concurrent work on combining neural architecture search (NAS) and model distillation for GAN compression:
 
 Yonggan Fu, Wuyang Chen, Haotao Wang, Haoran Li, Yingyan Lin, and Zhangyang Wang. "AutoGAN-Distiller: Searching to Compress Generative Adversarial Networks." ICML, 2020.
-[pdf](https://arxiv.org/pdf/2006.08198.pdf) [code](https://github.com/VITA-Group/AGD)
+\[[pdf](https://arxiv.org/pdf/2006.08198.pdf)\] \[[code](https://github.com/VITA-Group/AGD)\]
