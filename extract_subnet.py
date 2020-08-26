@@ -30,7 +30,7 @@ os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
 quant = True if 'GS8' in args.model_str else False
 
 # load dense model:
-g_path = os.path.join('cp_results', args.dataset, args.task, args.model_str, 'pth', 
+g_path = os.path.join('results', args.dataset, args.task, args.model_str, 'pth', 
     'epoch%d_netG.pth' % args.epoch)
 dense_model = Generator(input_nc, output_nc, quant=quant)
 dense_model.load_state_dict(torch.load(g_path))
@@ -55,7 +55,7 @@ print('sub_model:', type(sub_model))
 print("#parameters: ", model_param_num(sub_model))
 
 # save model structure npy:
-save_dir = os.path.join('subnet_structures_cp', args.dataset, args.task, args.model_str, 'pth')
+save_dir = os.path.join('subnet_structures', args.dataset, args.task, args.model_str, 'pth')
 create_dir(save_dir)
 np.save(os.path.join(save_dir, 'epoch%d_netG.npy' % args.epoch), np.array(dim_lst))
 
