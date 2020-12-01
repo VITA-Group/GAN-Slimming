@@ -22,12 +22,18 @@ Image-to-image translation by (compressed) CycleGAN:
 ```
 This will download the dataset to folder `datasets/<dataset_name>` (e.g., `datasets/summer2winter_yosemite`).
 
-### 2. Train origianl dense CycleGAN and generate style stransfer results on training set:
-Use the [offcial CycleGAN codes](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix) to train origianl dense CycleGAN and generate style stransfer results on training set.
-Put the style transfer results to folder `train_set_result/<dataset_name>`.
-For example, `train_set_result/summer2winter_yosemite/B/2009-12-06 06:58:39_fake.png` is the fake winter image transfered from the real summer image `datasets/summer2winter_yosemite/A/2009-12-06 06:58:39.png` using the orignal dense CycleGAN.
+### 2. Get the original dense CycleGAN:
+#### summer2winter_yosemite dataset
+Use the [official CycleGAN codes](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix) to train original dense CycleGAN.
 
-### 3. Compress
+#### horse2zebra dataset
+Using the pretrained dense generator and discriminator to initialize G and D for GAN-Slimming is necessary on horse2zebra dataset. Downloaded the dense models for GS32 and GS8 from [here](https://drive.google.com/drive/u/1/folders/10PwGVXBllb5SCfGwIFNUiaQ_bkV-0ROT) and [here](https://drive.google.com/drive/u/1/folders/1uRnbXfFAqrf_eLVBgccIgcnDSlxdHd60) respectively, and put them under the project root path.
+
+### 3. Generate style transfer results on training set
+Use the pretrained dense generator to generate style transfer results on training set and put the style transfer results to folder `train_set_result/<dataset_name>`.
+For example, `train_set_result/summer2winter_yosemite/B/2009-12-06 06:58:39_fake.png` is the fake winter image transferred from the real summer image `datasets/summer2winter_yosemite/A/2009-12-06 06:58:39.png` using the original dense CycleGAN.
+
+### 4. Compress
 GS-32:
 ```
 python gs.py --rho 0.01 --dataset <dataset_name> --task <task_name>
@@ -43,7 +49,7 @@ Valid `<dataset_name>`s are: `horse2zebra`, `summer2winter_yosemite`.
 Valid `<task_name>`s are: `A2B`, `B2A`. (For example, `horse2zebra/A2B` means transferring horse to zebra and `horse2zebra/B2A` means transferring zebra to horse.)
 
 
-### 4. Extract compact subnetwork obtained by GS
+### 5. Extract compact subnetwork obtained by GS
 GAN slimming has pruned some channels in the network by setting the channel-wise mask to zero. Now we need to extract the actual compressed subnetowrk.
 
 ```
@@ -52,7 +58,7 @@ python extract_subnet.py --dataset <dataset_name> --task <task_name> --model_str
 
 The extracted subnetworks will be saved in `subnet_structures/<dataset_name>/<task_name>`
 
-### 5. Finetune subnetwork
+### 6. Finetune subnetwork
 ```
 python finetune.py --dataset <dataset_name> --task <task_name> --base_model_str <base_model_str>
 ```
