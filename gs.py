@@ -99,13 +99,14 @@ if args.resume:
     )
     start_epoch = last_epoch + 1
 else:
-    dense_model_folder = 'pretrained_dense_model_quant' if args.quant else 'pretrained_dense_model'
-    g_path = os.path.join(foreign_dir, dense_model_folder, args.dataset, 'pth', 'netG_%s_epoch_%d.pth' % (args.task, 199) )
-    netG.load_state_dict(torch.load(g_path))
-    print('load G from %s' % g_path)
-    d_path = os.path.join(foreign_dir, dense_model_folder, args.dataset, 'pth', 'netD_%s_epoch_%d.pth' % (target_str, 199) )
-    netD.load_state_dict(torch.load(d_path))
-    print('load D from %s' % d_path)
+    if args.dataset == 'horse2zebra':
+        dense_model_folder = 'pretrained_dense_model_quant' if args.quant else 'pretrained_dense_model'
+        g_path = os.path.join(foreign_dir, dense_model_folder, args.dataset, 'pth', 'netG_%s_epoch_%d.pth' % (args.task, 199) )
+        netG.load_state_dict(torch.load(g_path))
+        print('load G from %s' % g_path)
+        d_path = os.path.join(foreign_dir, dense_model_folder, args.dataset, 'pth', 'netD_%s_epoch_%d.pth' % (target_str, 199) )
+        netD.load_state_dict(torch.load(d_path))
+        print('load D from %s' % d_path)
     start_epoch = 0
     loss_G_lst, loss_G_perceptual_lst, loss_G_GAN_lst, loss_D_lst, channel_number_lst = [], [], [], [], []
 
