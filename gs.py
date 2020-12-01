@@ -33,7 +33,7 @@ parser.add_argument('--size', type=int, default=256, help='size of the data crop
 parser.add_argument('--input_nc', type=int, default=3, help='number of channels of input data')
 parser.add_argument('--output_nc', type=int, default=3, help='number of channels of output data')
 parser.add_argument('--rho', type=float, default=0, help='l1 loss weight')
-parser.add_argument('--beta', type=float, default=0.001, help='GAN loss weight')
+parser.add_argument('--beta', type=float, default=20, help='GAN loss weight')
 parser.add_argument('--lc', default='vgg', choices=['vgg', 'mse'], help='G content loss. vgg: perceptual; mse: mse')
 parser.add_argument('--quant', action='store_true', help='enable quantization (for both activation and weight)')
 parser.add_argument('--resume', action='store_true', help='If true, resume from early stopped ckpt')
@@ -166,7 +166,7 @@ for epoch in range(start_epoch, args.epochs):
         loss_G_GAN = torch.nn.MSELoss()(pred_student_output_img, target_real)
 
         # Total G loss
-        loss_G = loss_G_perceptual + args.beta * loss_G_GAN
+        loss_G = args.beta * loss_G_perceptual + loss_G_GAN
         loss_G.backward()
         
         optimizer_G.step()
@@ -177,4 +177,95 @@ for epoch in range(start_epoch, args.epochs):
         loss_G_perceptual_meter.append(loss_G_perceptual.item())
         loss_G_GAN_meter.append(loss_G_GAN.item())
 
-        # proximal gradi
+        # proximal gradient for channel pruning:
+        current_lr = lr_scheduler_gamma.get_lr()[0]
+        for name, m in netG.named_modules():
+            if isinstance(m, nn.InstanceNorm2d) and m.weight is not None:
+                m.weight.data = soft_threshold(m.weight.data, th=float(args.rho) * float(current_lr))
+        
+        if i % 50 == 0:
+            if args.lc == 'vgg':
+                out_str_G = 'epoch %d-%d-G: perceptual %.4f (content %.4f, style %.4f) | gamma lr %.4f' % (
+                    epoch, i, loss_G_perceptual.data, loss_G_content.data, loss_G_style.data * 1e5, current_lr)
+            elif args.lc == 'mse':
+                out_str_G = 'epoch %d-%d-G: mse %.4f | gamma lr %.4f' % (
+                    epoch, i, loss_G_perceptual.data, current_lr)
+            print(out_str_G)
+        ###### End G ######
+
+
+        ###### D ######
+        optimizer_D.zero_grad()
+        
+        # real loss:
+        pred_teacher_output_img = netD(teacher_output_img)
+        loss_D_real = torch.nn.MSELoss()(pred_teacher_output_img, target_real)
+
+        # Fake loss
+        student_output_img_buffer_pop = fake_img_buffer.push_and_pop(student_output_img)
+        pred_student_output_img = netD(student_output_img_buffer_pop.detach())
+        loss_D_fake = torch.nn.MSELoss()(pred_student_output_img, target_fake)
+
+        # Total loss
+        loss_D = (loss_D_real + loss_D_fake)*0.5
+        loss_D.backward()
+
+        optimizer_D.step()
+
+        # append loss:
+        loss_D_meter.append(loss_D.item())
+        ###### End D ######
+
+
+    ## at the end of each epoch
+    netG.eval(), netG.eval()
+    # Update learning rates
+    lr_scheduler_G.step()
+    lr_scheduler_D.step()
+    lr_scheduler_gamma.step()
+
+    print('time: %.2f' % (time.time()-start_time))
+    print(args)
+
+    # plot training loss:
+    losses = {}
+    losses['loss_G'] = (loss_G_lst, loss_G_meter.avg)
+    losses['loss_G_perceptual'] = (loss_G_perceptual_lst, loss_G_perceptual_meter.avg)
+    losses['loss_G_GAN'] = (loss_G_GAN_lst, loss_G_GAN_meter.avg)
+    losses['loss_D'] = (loss_D_lst, loss_D_meter.avg)
+    for key in losses:
+        losses[key][0].append(losses[key][1])
+        plt.plot(losses[key][0])
+        plt.savefig(os.path.join(results_dir, '%s.png' % key))
+        plt.close()
+
+    if epoch % 10 == 0 or epoch == args.epochs - 1:
+        # save imgs:
+        images={'input_img': input_img, 'teacher_output_img': teacher_output_img, 'student_output_img': student_output_img}
+        for key in images:
+            img_np = images[key].detach().cpu().numpy()
+            img_np = np.moveaxis(img_np, 1, -1)
+            img_np = (img_np + 1) / 2 # (-1,1) -> (0,1)
+            img_big = fourD2threeD(img_np, n_row=4)
+            print(key, img_big.shape, np.amax(img_big), np.amin(img_big))
+            imsave(os.path.join(img_dir, 'epoch%d_%s.png' % (epoch, key)), img_as_ubyte(img_big))
+
+    if epoch % 20 == 0 or epoch == args.epochs - 1:    
+        # Save models checkpoints
+        torch.save(netG.state_dict(), os.path.join(pth_dir, 'epoch%d_netG.pth' % epoch))
+
+        # TBD: save best FID
+
+    # channel number:
+    channel_number_lst.append(none_zero_channel_num(netG))
+    plt.plot(channel_number_lst)
+    plt.savefig(os.path.join(results_dir, 'channel_number.png'))
+    plt.close()
+
+    # save latest:
+    save_ckpt(epoch, netG, netD, 
+        optimizer_G, optimizer_D, optimizer_gamma, 
+        lr_scheduler_G, lr_scheduler_D, lr_scheduler_gamma,
+        loss_G_lst, loss_G_perceptual_lst, loss_G_GAN_lst, loss_D_lst, channel_number_lst, 
+        path=os.path.join(pth_dir, 'latest.pth'))
+###### End Training ######

@@ -32,7 +32,7 @@ parser.add_argument('--task', type=str, default='A2B', choices=['A2B', 'B2A'])
 parser.add_argument('--size', type=int, default=256, help='size of the data crop (squared assumed)')
 parser.add_argument('--input_nc', type=int, default=3, help='number of channels of input data')
 parser.add_argument('--output_nc', type=int, default=3, help='number of channels of output data')
-parser.add_argument('--beta', type=float, default=0.001, help='minimax loss weight')
+parser.add_argument('--beta', type=float, default=20, help='minimax loss weight')
 parser.add_argument('--resume', action='store_true', help='If true, resume from early stopped ckpt')
 parser.add_argument('--lc', default='vgg', choices=['vgg', 'mse'], help='G content loss. vgg: perceptual; mse: mse')
 parser.add_argument('--base_model_str', help='from which subnet to finetune')
@@ -163,7 +163,7 @@ for epoch in range(start_epoch, args.epochs):
         loss_G_GAN = torch.nn.MSELoss()(pred_student_output_img, target_real)
 
         # Total G loss
-        loss_G = loss_G_perceptual + args.beta * loss_G_GAN
+        loss_G = args.beta * loss_G_perceptual + loss_G_GAN
         loss_G.backward()
         
         optimizer_G.step()
@@ -197,7 +197,7 @@ for epoch in range(start_epoch, args.epochs):
         loss_D_fake = torch.nn.MSELoss()(pred_student_output_img, target_fake)
 
         # Total loss
-        loss_D = args.beta * (loss_D_real + loss_D_fake)*0.5
+        loss_D = (loss_D_real + loss_D_fake)*0.5
         loss_D.backward()
 
         optimizer_D.step()
