@@ -42,7 +42,6 @@ if args.task == 'A2B':
     source_str, target_str = 'A', 'B'
 else:
     source_str, target_str = 'B', 'A'
-# foreign_dir = './'
 foreign_dir = './'
 print(args)
 
@@ -100,6 +99,13 @@ if args.resume:
     )
     start_epoch = last_epoch + 1
 else:
+    dense_model_folder = 'pretrained_dense_model_quant' if args.quant else 'pretrained_dense_model'
+    g_path = os.path.join(foreign_dir, dense_model_folder, args.dataset, 'pth', 'netG_%s_epoch_%d.pth' % (args.task, 199) )
+    netG.load_state_dict(torch.load(g_path))
+    print('load G from %s' % g_path)
+    d_path = os.path.join(foreign_dir, dense_model_folder, args.dataset, 'pth', 'netD_%s_epoch_%d.pth' % (target_str, 199) )
+    netD.load_state_dict(torch.load(d_path))
+    print('load D from %s' % d_path)
     start_epoch = 0
     loss_G_lst, loss_G_perceptual_lst, loss_G_GAN_lst, loss_D_lst, channel_number_lst = [], [], [], [], []
 
@@ -171,95 +177,4 @@ for epoch in range(start_epoch, args.epochs):
         loss_G_perceptual_meter.append(loss_G_perceptual.item())
         loss_G_GAN_meter.append(loss_G_GAN.item())
 
-        # proximal gradient for channel pruning:
-        current_lr = lr_scheduler_gamma.get_lr()[0]
-        for name, m in netG.named_modules():
-            if isinstance(m, nn.InstanceNorm2d) and m.weight is not None:
-                m.weight.data = soft_threshold(m.weight.data, th=float(args.rho) * float(current_lr))
-        
-        if i % 50 == 0:
-            if args.lc == 'vgg':
-                out_str_G = 'epoch %d-%d-G: perceptual %.4f (content %.4f, style %.4f) | gamma lr %.4f' % (
-                    epoch, i, loss_G_perceptual.data, loss_G_content.data, loss_G_style.data * 1e5, current_lr)
-            elif args.lc == 'mse':
-                out_str_G = 'epoch %d-%d-G: mse %.4f | gamma lr %.4f' % (
-                    epoch, i, loss_G_perceptual.data, current_lr)
-            print(out_str_G)
-        ###### End G ######
-
-
-        ###### D ######
-        optimizer_D.zero_grad()
-        
-        # real loss:
-        pred_teacher_output_img = netD(teacher_output_img)
-        loss_D_real = torch.nn.MSELoss()(pred_teacher_output_img, target_real)
-
-        # Fake loss
-        student_output_img_buffer_pop = fake_img_buffer.push_and_pop(student_output_img)
-        pred_student_output_img = netD(student_output_img_buffer_pop.detach())
-        loss_D_fake = torch.nn.MSELoss()(pred_student_output_img, target_fake)
-
-        # Total loss
-        loss_D = args.beta * (loss_D_real + loss_D_fake)*0.5
-        loss_D.backward()
-
-        optimizer_D.step()
-
-        # append loss:
-        loss_D_meter.append(loss_D.item())
-        ###### End D ######
-
-
-    ## at the end of each epoch
-    netG.eval(), netG.eval()
-    # Update learning rates
-    lr_scheduler_G.step()
-    lr_scheduler_D.step()
-    lr_scheduler_gamma.step()
-
-    print('time: %.2f' % (time.time()-start_time))
-    print(args)
-
-    # plot training loss:
-    losses = {}
-    losses['loss_G'] = (loss_G_lst, loss_G_meter.avg)
-    losses['loss_G_perceptual'] = (loss_G_perceptual_lst, loss_G_perceptual_meter.avg)
-    losses['loss_G_GAN'] = (loss_G_GAN_lst, loss_G_GAN_meter.avg)
-    losses['loss_D'] = (loss_D_lst, loss_D_meter.avg)
-    for key in losses:
-        losses[key][0].append(losses[key][1])
-        plt.plot(losses[key][0])
-        plt.savefig(os.path.join(results_dir, '%s.png' % key))
-        plt.close()
-
-    if epoch % 10 == 0 or epoch == args.epochs - 1:
-        # save imgs:
-        images={'input_img': input_img, 'teacher_output_img': teacher_output_img, 'student_output_img': student_output_img}
-        for key in images:
-            img_np = images[key].detach().cpu().numpy()
-            img_np = np.moveaxis(img_np, 1, -1)
-            img_np = (img_np + 1) / 2 # (-1,1) -> (0,1)
-            img_big = fourD2threeD(img_np, n_row=4)
-            print(key, img_big.shape, np.amax(img_big), np.amin(img_big))
-            imsave(os.path.join(img_dir, 'epoch%d_%s.png' % (epoch, key)), img_as_ubyte(img_big))
-
-    if epoch % 20 == 0 or epoch == args.epochs - 1:    
-        # Save models checkpoints
-        torch.save(netG.state_dict(), os.path.join(pth_dir, 'epoch%d_netG.pth' % epoch))
-
-        # TBD: save best FID
-
-    # channel number:
-    channel_number_lst.append(none_zero_channel_num(netG))
-    plt.plot(channel_number_lst)
-    plt.savefig(os.path.join(results_dir, 'channel_number.png'))
-    plt.close()
-
-    # save latest:
-    save_ckpt(epoch, netG, netD, 
-        optimizer_G, optimizer_D, optimizer_gamma, 
-        lr_scheduler_G, lr_scheduler_D, lr_scheduler_gamma,
-        loss_G_lst, loss_G_perceptual_lst, loss_G_GAN_lst, loss_D_lst, channel_number_lst, 
-        path=os.path.join(pth_dir, 'latest.pth'))
-###### End Training ######
+        # proximal gradi
